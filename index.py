@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from fetch_youtube import fetch_results, fetch_from_collection
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -35,4 +36,5 @@ def fetch_from_database():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5001)))
+
