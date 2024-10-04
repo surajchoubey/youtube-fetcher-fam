@@ -4,15 +4,17 @@ def publishedDateTime(delta=0):
     time_diff = datetime.now() - timedelta(days=delta)
     return time_diff.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-def fetch_yt_and_save(youtube, topic, collection):
-    published_after = publishedDateTime(1)
+def fetch_yt_and_save(youtube, topic, collection, delta):
+    published_after = publishedDateTime(delta)
+    published_before = publishedDateTime(delta - 1)
     request = youtube.search().list(
         order="date",
         part="snippet",
         maxResults=10,
         q=topic,
         videoLicense="any",
-        publishedAfter=published_after
+        publishedAfter=published_after,
+        publishedBefore=published_before
     )
     
     response = request.execute()

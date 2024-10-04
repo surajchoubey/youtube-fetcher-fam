@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from fetch_youtube import fetch_results, fetch_from_collection
 from flask_cors import CORS
+from time import sleep
 import os
 
 app = Flask(__name__)
@@ -9,7 +10,15 @@ CORS(app)
 @app.route('/trigger', methods = ['POST'])
 def trigger_youtube_and_save():
     topic = 'football'
-    return fetch_results(topic)
+    i = 6
+    try:
+        while i > 0:
+            fetch_results(topic, i)
+            sleep(10)
+            i -= 1
+        return jsonify({ "success": True })
+    except:
+        return jsonify({ "success": True })
 
 @app.route('/', methods=['GET'])
 def fetch_from_database():
@@ -19,10 +28,11 @@ def fetch_from_database():
     search_text = request.args.get('search_text', None)
     before_date = request.args.get('before_date', None)
     after_date = request.args.get('after_date', None)
+    sortby = int(request.args.get('sortBy', -1))
     
     print(before_date, after_date)
 
-    videos, total_count = fetch_from_collection(page, page_size, search_text, before_date, after_date)
+    videos, total_count = fetch_from_collection(page, page_size, search_text, before_date, after_date, sortby)
 
     total_pages = (total_count + page_size - 1) // page_size
 

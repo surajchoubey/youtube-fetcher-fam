@@ -15,7 +15,7 @@ DEVELOPER_KEYS = [
     "AIzaSyB7RiMI7CDUr-j-FfpuzI7BGCb6RoRV8wQ",
 ]
 
-def fetch_results(topic: str):
+def fetch_results(topic: str, delta: int):
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
     api_service_name = "youtube"
     api_version = "v3"
@@ -26,7 +26,7 @@ def fetch_results(topic: str):
         try:
             developer_key = DEVELOPER_KEYS[current_key_index]
             youtube = googleapiclient.discovery.build(api_service_name, api_version, developerKey=developer_key)
-            response = fetch_yt_and_save(youtube, topic, collection)
+            response = fetch_yt_and_save(youtube, topic, collection, delta)
             return response
 
         except HttpError as e:
@@ -38,7 +38,7 @@ def fetch_results(topic: str):
 
 
     
-def fetch_from_collection(page =1, page_size = 10, search_text = None, before_date = None, after_date = None):
+def fetch_from_collection(page =1, page_size = 10, search_text = None, before_date = None, after_date = None, sortby = -1):
     
     if page <= 0: page = 1
     query = {}
@@ -57,7 +57,7 @@ def fetch_from_collection(page =1, page_size = 10, search_text = None, before_da
         query.setdefault("publishedAt", {})["$gt"] = after_date
 
     skip = (page - 1) * page_size
-    cursor = collection.find(query).sort("publishedAt", -1).skip(skip).limit(page_size)
+    cursor = collection.find(query).sort("publishedAt", sortby).skip(skip).limit(page_size)
     
     videos = []
     for document in cursor:
