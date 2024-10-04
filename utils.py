@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
+from pymongo.errors import DuplicateKeyError
+from pymongo import UpdateOne
 
 def publishedDateTime(delta=0):
-    time_diff = datetime.now() - timedelta(days=delta)
+    time_diff = datetime.now() - timedelta(seconds=delta)
     return time_diff.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-def fetch_yt_and_save(youtube, topic, collection, delta):
-    published_after = publishedDateTime(delta)
-    published_before = publishedDateTime(delta - 1)
+def fetch_yt_and_save(youtube, topic, collection):
+    published_after = publishedDateTime(10)
+    published_before = publishedDateTime()
     request = youtube.search().list(
         order="date",
         part="snippet",
@@ -19,11 +21,11 @@ def fetch_yt_and_save(youtube, topic, collection, delta):
     
     response = request.execute()
 
-    videos = []
     if "items" in response:
+        videos = []
         for item in response["items"]:
             video_info = {
-                'videoId': item['id']['videoId'],
+                '_id': item['id']['videoId'],
                 'title': item['snippet']['title'],
                 'description': item['snippet']['description'],
                 'publishedAt': item['snippet']['publishedAt'],
@@ -33,5 +35,18 @@ def fetch_yt_and_save(youtube, topic, collection, delta):
             }
             videos.append(video_info)
         
-        collection.insert_many(videos)
+        operations = []
+
+        for video in videos:
+            operations.append(
+                UpdateOne(
+                    {"_id": video["_id"]},
+                    {"$set": video},
+                    upsert=True
+                )
+            )
+
+        if len(operations) > 0:
+            collection.bulk_write(operations)
+
     return response

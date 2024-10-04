@@ -1,21 +1,31 @@
+from dotenv import load_dotenv
 import os
 import googleapiclient.discovery
 from googleapiclient.errors import HttpError
 from utils import fetch_yt_and_save
 from pymongo.mongo_client import MongoClient
 
-uri = "mongodb+srv://choubey:choubey@youtube.h68co.mongodb.net/?retryWrites=true&w=majority&appName=Youtube"
-client = MongoClient(uri)
+
+if os.path.exists('.env'):
+    load_dotenv()
+    print("FOUND: .env file exists.")
+else:
+    print("No .env file found.")
+    raise FileNotFoundError("ERROR: pls put .env file")
+
+
+MONGODB_URI = os.getenv("MONGODB_URI")
+client = MongoClient(MONGODB_URI)
 db = client["youtube_data"]
 collection = db["search_results"]
 
 DEVELOPER_KEYS = [
-    "AIzaSyCP8eI247p6LMlhzWBtK1u_Qo70yKw4xd4",
-    "AIzaSyAMQ89YuQaeW-eHFfLZOJVckLfj7nh_tGM",
-    "AIzaSyB7RiMI7CDUr-j-FfpuzI7BGCb6RoRV8wQ",
+    os.getenv("GOOGLE_API_KEY_1"),
+    os.getenv("GOOGLE_API_KEY_2"),
+    os.getenv("GOOGLE_API_KEY_3")
 ]
 
-def fetch_results(topic: str, delta: int):
+def fetch_results(topic: str):
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
     api_service_name = "youtube"
     api_version = "v3"
@@ -26,7 +36,7 @@ def fetch_results(topic: str, delta: int):
         try:
             developer_key = DEVELOPER_KEYS[current_key_index]
             youtube = googleapiclient.discovery.build(api_service_name, api_version, developerKey=developer_key)
-            response = fetch_yt_and_save(youtube, topic, collection, delta)
+            response = fetch_yt_and_save(youtube, topic, collection)
             return response
 
         except HttpError as e:
@@ -62,7 +72,7 @@ def fetch_from_collection(page =1, page_size = 10, search_text = None, before_da
     videos = []
     for document in cursor:
         videos.append({
-            "videoId": document['videoId'],
+            "_id": document['_id'],
             "title": document['title'],
             "description": document['description'],
             "publishedAt": document['publishedAt'],
@@ -72,7 +82,7 @@ def fetch_from_collection(page =1, page_size = 10, search_text = None, before_da
         })
     
     total_count = collection.count_documents(query)
-    
+    print(total_count)
     return videos, total_count
 
 
