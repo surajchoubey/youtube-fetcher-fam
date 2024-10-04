@@ -41,7 +41,7 @@ def trigger_youtube_and_save():
     while True:
         topic = 'football'
         print("Triggering YOUTUBE!")
-        # fetch_results(topic)
+        fetch_results(topic)
         sleep(10)
 
 if __name__ == '__main__':
