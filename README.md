@@ -1,10 +1,12 @@
 # YOUTUBE FETCHER APPLICATION
 
+![Screenshot 2024-10-05 at 11 54 13](https://github.com/user-attachments/assets/0fc1e3b3-d00c-4a71-a826-83690fb7d7d5)
+
 ## (1/4) BASIC VIEW 
 
 The cron job keeps running every 10 seconds in the background and makes sure it saves only unique videos in the database so no videos are repeated.
 
-![Screenshot 2024-10-05 at 11 54 13](https://github.com/user-attachments/assets/0fc1e3b3-d00c-4a71-a826-83690fb7d7d5)
+<img width="425" alt="Screenshot 2024-10-05 at 11 59 07" src="https://github.com/user-attachments/assets/a8840c00-f1ec-4e11-a80b-db47f83b03d9">
 
 
 ## (2/4) HOW TO USE THIS PROJECT WITHOUT DOCKER ?
