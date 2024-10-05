@@ -7,16 +7,23 @@ def publishedDateTime(delta=0):
     return time_diff.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 def fetch_yt_and_save(youtube, topic, collection):
-    published_after = publishedDateTime(10)
-    published_before = publishedDateTime()
+    
+    published_after = publishedDateTime(300) # for first video in database fetching from five mins ago
+    
+    last_video = list(collection.find().sort("publishedAt", -1).limit(1))
+
+    if len(last_video):
+        published_after = last_video[0]["publishedAt"]
+        
+    print("Published after = " + published_after)
+        
     request = youtube.search().list(
         order="date",
         part="snippet",
         maxResults=10,
         q=topic,
         videoLicense="any",
-        publishedAfter=published_after,
-        publishedBefore=published_before
+        publishedAfter=published_after
     )
     
     response = request.execute()
@@ -47,6 +54,8 @@ def fetch_yt_and_save(youtube, topic, collection):
             )
 
         if len(operations) > 0:
-            collection.bulk_write(operations)
+            task = collection.bulk_write(operations)
+            print("Operations done in database")
+            print(task)
 
     return response
